@@ -17,7 +17,8 @@
     --cilium-length: 50%;
 
     /* Horns */
-    --horn-size: 10%; 
+    --horn-length: 10%;
+    --horn-width: 60%;
 
     /* Wings */
     --wing-width: 1;
@@ -42,29 +43,6 @@
     --r-channel-highlight: 200;
     --g-channel-highlight: 100;
     --b-channel-highlight: 150;
-
-
-    /* Calculations body */
-    --dino-width: calc(var(--dino-size) * (1 - var(--dino-shape)));
-    --dino-height: calc(var(--dino-size) * var(--dino-shape));
-
-    /* Calculation color */
-
-    --higlight-color:rgb(var(--r-channel-highlight), var(--g-channel-highlight), var(--b-channel-highlight));
-
-    --c-mid: rgb(var(--r-channel), var(--g-channel), var(--b-channel));
-    --c-light: color-mix(in srgb, var(--c-mid) 80%, white);
-    --c-dark: color-mix(in srgb, var(--c-mid) 80%, black);
-    
-    --c-shell1: color-mix(in srgb, var(--c-mid) 50%, white);
-    --c-shell2: color-mix(in srgb, var(--c-light) 80%, var(--higlight-color));
-    
-    --glow-color-raw: rgb(var(--r-channel-highlight), var(--g-channel-highlight), var(--b-channel-highlight));
-    
-    --glow-color: color-mix(in srgb, var(--c-mid) 50%, rgba(255,255,255, var(--glow-color-intensity)));
-    --c-very-light: color-mix(in srgb, var(--c-mid) 20%, rgba(255,255,255, var(--glow-color-intensity)));
-
-    --plate-border-color: color-mix(in srgb, var(--c-mid) 10%, black);
 }
 
 body {
@@ -79,7 +57,7 @@ body {
 }
 
 
-.dinoflagellate-container {
+.dinophyte-container {
     position: relative;
     width: var(--dino-container-width);
     height: var(--dino-container-height);
@@ -91,7 +69,7 @@ body {
 }
 
 
-.dinoflagellate-body {
+.dinophyte-body {
     width: var(--dino-width);
     height: var(--dino-height);
     position: relative;
@@ -102,13 +80,36 @@ body {
     flex-direction: column;
     justify-content: space-between;
     background-color: black;
+    border-radius: calc(var(--roundness)*0.5) calc(var(--roundness)*0.5) calc(5% + var(--cingulum-depth)/2) calc(5% + var(--cingulum-depth)/2) / var(--roundness) var(--roundness) calc(20% + var(--cingulum-depth)/3) calc(20% + var(--cingulum-depth)/3);
+
+     /* Calculations body */
+     --dino-width: calc(var(--dino-size) * (1 - var(--dino-shape)));
+     --dino-height: calc(var(--dino-size) * var(--dino-shape));
+ 
+     /* Calculation color */
+ 
+     --higlight-color:rgb(var(--r-channel-highlight), var(--g-channel-highlight), var(--b-channel-highlight));
+ 
+     --c-mid: rgb(var(--r-channel), var(--g-channel), var(--b-channel));
+     --c-light: color-mix(in srgb, var(--c-mid) 80%, white);
+     --c-dark: color-mix(in srgb, var(--c-mid) 80%, black);
+     
+     --c-shell1: color-mix(in srgb, var(--c-mid) 50%, white);
+     --c-shell2: color-mix(in srgb, var(--c-light) 80%, var(--higlight-color));
+     
+     --glow-color-raw: rgb(var(--r-channel-highlight), var(--g-channel-highlight), var(--b-channel-highlight));
+     
+     --glow-color: color-mix(in srgb, var(--c-mid) 50%, rgba(255,255,255, var(--glow-color-intensity)));
+     --c-very-light: color-mix(in srgb, var(--c-mid) 20%, rgba(255,255,255, var(--glow-color-intensity)));
+ 
+     --plate-border-color: color-mix(in srgb, var(--c-mid) 10%, black);
 }
 
 
 
 .body-half {
     width: 100%;
-    height: 45%;
+    height: calc((100% - (var(--cingulum-thickness)*0.1 + 5% )) * 0.5);
     position: relative;
     box-sizing: border-box;
     z-index:2;
@@ -144,11 +145,11 @@ body {
 .wing-left-bottom { width: calc(var(--dino-width) * var(--wing-width) * 0.45); height: var(--wing-height); top: calc(3% + var(--wing-position) * 0.25); left: -6%; border-radius: 50% 200% 20px 60% / 80% 30% 20px 80%; transform: skewX(calc(var(--wing-skew) * -1)) rotate(-18deg); z-index: 3; }
 .wing-right-bottom { width: calc(var(--dino-width) * var(--wing-width) * 0.45); height: var(--wing-height); top: calc(3% + var(--wing-position) * 0.25); right: -6%; border-radius: 200% 50% 60% 20px / 30% 80% 80% 20px; transform: skewX(var(--wing-skew)) rotate(18deg); z-index: 3; }
 
-.horn { width: 60%; height: var(--horn-size); bottom: 95%; left: 50%; border: 1px solid var(--plate-border-color) 1px solid var(--plate-border-color) 1px solid var(--plate-border-color) 0; border-radius: 0%; transform: translateX(-50%) rotate(0deg) skewY(0deg); z-index: -1; clip-path: polygon(10% 100%, 15% 90%, 20% 80%, 25% 65%, 30% 45%, 35% 20%, 37% 5%, 38% 2%, 40% 0%, 60% 0%, 62% 2%, 63% 5%, 65% 20%, 70% 45%, 75% 65%, 80% 80%, 85% 90%, 90% 100%); background-image: linear-gradient(135deg, rgba(255,255,255,0.04) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.04) 50%, rgba(255,255,255,0.04) 75%, transparent 75%, transparent 100%), linear-gradient(200deg, var(--c-light) 0%, var(--c-shell2) 40%, var(--c-shell1) 100%); box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.15), 1px 1px 2px rgba(0, 0, 0, 0.3); }
+.horn { width: var(--horn-width); height: var(--horn-length); bottom: 95%; left: 50%; border: 1px solid var(--plate-border-color) 1px solid var(--plate-border-color) 1px solid var(--plate-border-color) 0; border-radius: 0%; transform: translateX(-50%) rotate(0deg) skewY(0deg); z-index: -1; clip-path: polygon(10% 100%, 15% 90%, 20% 80%, 25% 65%, 30% 45%, 35% 20%, 37% 5%, 38% 2%, 40% 0%, 60% 0%, 62% 2%, 63% 5%, 65% 20%, 70% 45%, 75% 65%, 80% 80%, 85% 90%, 90% 100%); background-image: linear-gradient(135deg, rgba(255,255,255,0.04) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.04) 50%, rgba(255,255,255,0.04) 75%, transparent 75%, transparent 100%), linear-gradient(200deg, var(--c-light) 0%, var(--c-shell2) 40%, var(--c-shell1) 100%); box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.15), 1px 1px 2px rgba(0, 0, 0, 0.3); }
 .horn-pillar {
     position: absolute;
     width: 15%; 
-    height: calc(var(--horn-size));
+    height: calc(var(--horn-length));
     bottom: 95%; 
     left: 50%;
     transform: translateX(-50%);
@@ -170,7 +171,7 @@ body {
 .cingulum-container {
     position: relative; 
     width: 100%;
-    height: calc(var(--cingulum-thickness)*0.1);
+    height: calc(var(--cingulum-thickness)*0.1 + 5%);
     display: flex;
     justify-content: center;
     align-items: center;
