@@ -1,0 +1,370 @@
+
+:root {
+    /* Dinophyte container */
+    --dino-container-width: 500px;
+    --dino-container-height: 600px;
+
+    /* General shape */
+    --dino-size: 100%;
+    --dino-shape: 0.50; /* 0.25 - 0.75 */
+    
+    --cingulum-depth: 50%;
+    --cingulum-thickness: 100%;
+    --roundness: 60%; /* 60% - 100% */
+
+    /* Cilium*/
+    --cilium-thickness: 0.2;
+    --cilium-length: 50%;
+
+    /* Horns */
+    --horn-size: 10%; 
+
+    /* Wings */
+    --wing-width: 1;
+    --wing-height: 100%;
+    --wing-position: 100%;
+    --wing-skew: 40deg; /* -25deg - 40deg*/
+
+    /* Glow */
+    --glow-size: 50;
+    --glow-color-intensity: 0.5;
+
+    /* Nucleus */
+    --nucleus-deformation: 0.2;
+
+    /* Colors */
+    --shell-opacity: 70%;
+
+    --r-channel: 30;
+    --g-channel: 100;
+    --b-channel: 200;
+
+    --r-channel-highlight: 200;
+    --g-channel-highlight: 100;
+    --b-channel-highlight: 150;
+
+
+    /* Calculations body */
+    --dino-width: calc(var(--dino-size) * (1 - var(--dino-shape)));
+    --dino-height: calc(var(--dino-size) * var(--dino-shape));
+
+    /* Calculation color */
+
+    --higlight-color:rgb(var(--r-channel-highlight), var(--g-channel-highlight), var(--b-channel-highlight));
+
+    --c-mid: rgb(var(--r-channel), var(--g-channel), var(--b-channel));
+    --c-light: color-mix(in srgb, var(--c-mid) 80%, white);
+    --c-dark: color-mix(in srgb, var(--c-mid) 80%, black);
+    
+    --c-shell1: color-mix(in srgb, var(--c-mid) 50%, white);
+    --c-shell2: color-mix(in srgb, var(--c-light) 80%, var(--higlight-color));
+    
+    --glow-color-raw: rgb(var(--r-channel-highlight), var(--g-channel-highlight), var(--b-channel-highlight));
+    
+    --glow-color: color-mix(in srgb, var(--c-mid) 50%, rgba(255,255,255, var(--glow-color-intensity)));
+    --c-very-light: color-mix(in srgb, var(--c-mid) 20%, rgba(255,255,255, var(--glow-color-intensity)));
+
+    --plate-border-color: color-mix(in srgb, var(--c-mid) 10%, black);
+}
+
+body {
+    background-color: black;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: visible;
+}
+
+
+.dinoflagellate-container {
+    position: relative;
+    width: var(--dino-container-width);
+    height: var(--dino-container-height);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid green;
+}
+
+
+.dinoflagellate-body {
+    width: var(--dino-width);
+    height: var(--dino-height);
+    position: relative;
+    top: 0;
+    left: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: black;
+}
+
+
+
+.body-half {
+    width: 100%;
+    height: 45%;
+    position: relative;
+    box-sizing: border-box;
+    z-index:2;
+}
+
+.top {
+    top: 0;
+    left: 0;
+}
+
+.plate {
+    position: absolute;
+    box-sizing: border-box;
+    border: 1px solid var(--plate-border-color);
+    box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.15),
+                inset -1px -1px 3px #00000099,
+                1px 1px 2px rgba(0, 0, 0, 0.3);
+    background-image: linear-gradient(135deg, rgba(255,255,255,0.04) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.04) 50%, rgba(255,255,255,0.04) 75%, transparent 75%, transparent 100%),
+                      linear-gradient(160deg, var(--c-shell1) 0%, var(--c-shell2) 60%, var(--c-light) 100%);
+    background-size: 6px 6px, 100% 100%;
+    border-radius: 18px;
+    opacity: var(--shell-opacity);
+    /* Default z-index for plates */
+    z-index: 2;
+    animation: flicker 5s infinite ease-in-out;
+}
+
+.top-plate { width: 100%; height: 100%; top: 0; left: 0; border: 0 1px solid var(--plate-border-color) 1px solid var(--plate-border-color) 1px solid var(--plate-border-color); border-radius: calc(var(--roundness)*0.5) calc(var(--roundness)*0.5) calc(5% + var(--cingulum-depth)/2) calc(5% + var(--cingulum-depth)/2) / var(--roundness) var(--roundness) calc(20% + var(--cingulum-depth)/3) calc(20% + var(--cingulum-depth)/3); transform: rotate(0deg); z-index: 1; }
+.bottom-plate { width: 100%; height: 100%; bottom: 0; left: 0; border-radius: calc(5% + var(--cingulum-depth)/2) calc(5% + var(--cingulum-depth)/3) calc(var(--roundness)*0.5) calc(var(--roundness)*0.5) / calc(20% + var(--cingulum-depth)/3) calc(20% + var(--cingulum-depth)/3) var(--roundness) var(--roundness); transform: rotate(0deg); z-index: 1; }
+
+.wing-left-top { width: calc(var(--dino-width) * var(--wing-width) * 0.45); height: var(--wing-height); bottom: calc(3% + var(--wing-position) * 0.25); left: -6%; border-radius: 60% 20px 200% 50% / 80% 20px 30% 80%; transform: skewX(var(--wing-skew)) rotate(18deg); z-index: 3; }
+.wing-right-top { width: calc(var(--dino-width) * var(--wing-width) * 0.45); height: var(--wing-height); bottom: calc(3% + var(--wing-position) * 0.25); right: -6%; border-radius: 20px 60% 50% 200% / 20px 80% 80% 30%; transform: skewX(calc(var(--wing-skew) * -1)) rotate(-18deg); z-index: 3; }
+.wing-left-bottom { width: calc(var(--dino-width) * var(--wing-width) * 0.45); height: var(--wing-height); top: calc(3% + var(--wing-position) * 0.25); left: -6%; border-radius: 50% 200% 20px 60% / 80% 30% 20px 80%; transform: skewX(calc(var(--wing-skew) * -1)) rotate(-18deg); z-index: 3; }
+.wing-right-bottom { width: calc(var(--dino-width) * var(--wing-width) * 0.45); height: var(--wing-height); top: calc(3% + var(--wing-position) * 0.25); right: -6%; border-radius: 200% 50% 60% 20px / 30% 80% 80% 20px; transform: skewX(var(--wing-skew)) rotate(18deg); z-index: 3; }
+
+.horn { width: 60%; height: var(--horn-size); bottom: 95%; left: 50%; border: 1px solid var(--plate-border-color) 1px solid var(--plate-border-color) 1px solid var(--plate-border-color) 0; border-radius: 0%; transform: translateX(-50%) rotate(0deg) skewY(0deg); z-index: -1; clip-path: polygon(10% 100%, 15% 90%, 20% 80%, 25% 65%, 30% 45%, 35% 20%, 37% 5%, 38% 2%, 40% 0%, 60% 0%, 62% 2%, 63% 5%, 65% 20%, 70% 45%, 75% 65%, 80% 80%, 85% 90%, 90% 100%); background-image: linear-gradient(135deg, rgba(255,255,255,0.04) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.04) 50%, rgba(255,255,255,0.04) 75%, transparent 75%, transparent 100%), linear-gradient(200deg, var(--c-light) 0%, var(--c-shell2) 40%, var(--c-shell1) 100%); box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.15), 1px 1px 2px rgba(0, 0, 0, 0.3); }
+.horn-pillar {
+    position: absolute;
+    width: 15%; 
+    height: calc(var(--horn-size));
+    bottom: 95%; 
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    background-color: black;
+    animation: flicker 5s infinite ease-in-out;
+    background-image: linear-gradient(135deg, rgba(255,255,255,0.04) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.04) 50%, rgba(255,255,255,0.04) 75%, transparent 75%, transparent 100%),
+                        linear-gradient(215deg, var(--c-light) 0%, var(--c-shell2) 50%, var(--c-shell1) 100%);
+    box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.15);
+    border: none;
+    border-radius: 20px;
+}
+
+
+.plate-8 { display: none; width: 22%; height: 17%; top: 40%; right: 12%; border-radius: 60% 40% 50% 50% / 50% 50% 50% 50%; transform: rotate(30deg) skewX(8deg); z-index: 4; background: linear-gradient(160deg, #6090a8 0%, #5a9396 60%, #4c7d7f 100%); opacity: 0.9; }
+.plate-9 { display: none; width: 15%; height: 10%; top: 32%; left: 42%; border-radius: 50%; transform: rotate(5deg); z-index: 3; background: linear-gradient(160deg, #6a9fb8 0%, #64a0a2 60%, #568b8e 100%); opacity: 0.95; }
+
+
+.cingulum-container {
+    position: relative; 
+    width: 100%;
+    height: calc(var(--cingulum-thickness)*0.1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cingulum {
+    width: calc(100% - var(--cingulum-depth));
+    height: 100%;
+    position: relative;
+    box-shadow: inset 1px 1px 2px rgba(255, 255, 255, 0.15),
+                inset -1px -1px 3px rgba(0, 0, 0, 0.6),
+                1px 1px 2px rgba(0, 0, 0, 0.3);
+    background-image: linear-gradient(135deg, rgba(255,255,255,0.04) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.04) 50%, rgba(255,255,255,0.04) 75%, transparent 75%, transparent 100%),
+                      linear-gradient(160deg, var(--c-shell1) 0%, var(--c-shell2) 60%, var(--c-light) 100%);
+    background-size: 6px 6px, 100% 100%;
+    border-radius: 18px;
+    opacity: calc(var(--shell-opacity) * 0.8);
+    box-sizing: border-box;
+    border-radius: 5px;
+    z-index: 5; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: visible;
+}
+
+.transverse-cilium {
+    position: absolute;
+    left: -10%;
+    width: 120%;
+    height: calc(var(--cilium-thickness)*0.7*var(--dino-container-width)); 
+    background: var(--higlight-color);
+    opacity: 100%; 
+    border-radius: 2px;
+    z-index: 6; 
+    animation: transverse-wave 4s linear infinite;
+}
+
+.cilium {
+    position: absolute;
+    top: 90%;
+    left: 50%;
+    width: calc(var(--cilium-thickness)*0.05*var(--dino-container-width));
+    height: var(--cilium-length);
+    background: var(--higlight-color);
+    transform-origin: top center;
+    z-index: -1; 
+    animation: wiggle 2s cubic-bezier(0.65, 0.05, 0.36, 0.95) infinite;
+}
+
+.cilium::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 100%;
+    height: 20%;
+    background: inherit;
+    border-radius:  0 0 50% 50%/ 0 0 100% 100%;
+    transform-origin: top center;
+    animation: tip-bend 2s ease-in-out infinite reverse;
+}
+
+
+.cytoplasm {
+    position: absolute;
+    width: calc(96% - var(--cingulum-depth));
+    height: 100%;
+    top: 0;
+    left: calc(var(--cingulum-depth)/2 + 2%);
+    border-radius: 50%;
+    background: radial-gradient(ellipse at 50% 45%, var(--c-light) 10%, var(--c-mid) 40%, var(--c-dark) 95%);
+    border: 2px  var(--plate-border-color);
+    box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.8),
+                inset 0 0 10px rgba(173, 216, 230, 0.2);
+    z-index: 0;
+}
+
+
+.nucleus-container {
+    width:100%;
+    height:100%;
+    display: flex;
+    position: absolute;
+    justify-content: center;
+    align-items: center;
+    animation: rotateOrbitRight 9s cubic-bezier(0.43, 0.41, 0.45, 0.4) infinite;
+}
+
+.nucleus {
+    display: flex;
+    position: absolute;
+    width: 24%;
+    aspect-ratio: calc(1 + var(--nucleus-deformation));
+    background: radial-gradient(ellipse at center, rgba(200, 240, 240), rgba(100, 180, 180) 70%);
+    opacity: 30%;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.5),
+                0 0 5px rgba(200, 240, 240, 0.1);
+    border: 1px solid rgba(224, 255, 255, 0.15);
+    z-index: 0; 
+    animation: rotateOrbitLeft 24s linear infinite;
+}
+
+
+/* Keyframes for the transverse cilium's wave motion */
+@keyframes transverse-wave {
+    0%, 100% {
+      clip-path: polygon(
+        0% 50%, 10% 55%, 20% 45%, 30% 55%, 40% 45%, 50% 55%,
+        60% 45%, 70% 55%, 80% 45%, 90% 55%, 100% 50%,
+        100% 60%, 90% 50%, 80% 60%, 70% 50%, 60% 60%,
+        50% 50%, 40% 60%, 30% 50%, 20% 60%, 10% 50%, 0% 60%
+      );
+    }
+  
+    25% {
+      clip-path: polygon(
+        0% 45%, 10% 60%, 20% 40%, 30% 60%, 40% 40%, 50% 60%,
+        60% 40%, 70% 60%, 80% 40%, 90% 60%, 100% 45%,
+        100% 55%, 90% 40%, 80% 55%, 70% 40%, 60% 55%,
+        50% 40%, 40% 55%, 30% 40%, 20% 55%, 10% 40%, 0% 55%
+      );
+    }
+  
+    50% {
+      clip-path: polygon(
+        0% 55%, 10% 45%, 20% 60%, 30% 45%, 40% 60%, 50% 45%,
+        60% 60%, 70% 45%, 80% 60%, 90% 45%, 100% 55%,
+        100% 45%, 90% 60%, 80% 45%, 70% 60%, 60% 45%,
+        50% 60%, 40% 45%, 30% 60%, 20% 45%, 10% 60%, 0% 45%
+      );
+    }
+  
+    75% {
+      clip-path: polygon(
+        0% 50%, 10% 60%, 20% 50%, 30% 60%, 40% 50%, 50% 60%,
+        60% 50%, 70% 60%, 80% 50%, 90% 60%, 100% 50%,
+        100% 50%, 90% 60%, 80% 50%, 70% 60%, 60% 50%,
+        50% 60%, 40% 50%, 30% 60%, 20% 50%, 10% 60%, 0% 50%
+      );
+    }
+  }
+  
+
+@keyframes rotateOrbitRight {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+@keyframes rotateOrbitLeft {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(-360deg); }
+  }
+
+/* Keyframes for the trailing cilium animation */
+@keyframes wiggle {
+    0% { transform: translateX(-50%) rotate(18deg) scaleY(1); }
+    25% { transform: translateX(-50%) rotate(-8deg) scaleY(0.96); }
+    50% { transform: translateX(-50%) rotate(-22deg) scaleY(1); }
+    75% { transform: translateX(-50%) rotate(10deg) scaleY(0.96); }
+    100% { transform: translateX(-50%) rotate(18deg) scaleY(1); }
+}
+
+@keyframes tip-bend {
+    0% {
+      transform: translateX(-50%) translateY(98%) rotate(4deg);
+    }
+    25% {
+      transform: translateX(-50%) translateY(98%) rotate(-9deg);
+    }
+    50% {
+      transform: translateX(-50%) translateY(98%) rotate(-4deg);
+    }
+    75% {
+      transform: translateX(-50%) translateY(98%) rotate(9deg);
+    }
+    100% {
+      transform: translateX(-50%) translateY(100%) rotate(4deg);
+    }
+  }
+  
+
+@keyframes flicker {
+    0%, 100% { filter: drop-shadow(0 0 calc(var(--glow-size)*1px) var(--glow-color)); }
+    50% { filter: drop-shadow(0 0 calc(var(--glow-size)*1.2px) var(--c-very-light)); }
+  }
+
+
+
+/* Interactive elements */
+.plate:hover {
+    filter: brightness(1.3) drop-shadow(0 0 5px var(--glow-color));
+    transition: filter 0.3s ease;
+  }
