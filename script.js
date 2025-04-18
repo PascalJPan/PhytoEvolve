@@ -1,4 +1,3 @@
-// create a dinophyte
 function createDinophyte(container) {
   const dino = document.createElement('div');
   dino.classList.add('dinophyte-body');
@@ -72,6 +71,7 @@ function createDinophyte(container) {
 }
 
 const dinoConfig = [
+    { name: 'specific-clock', lower: 0.5, upper: 1.5, unit: '' },
     { name: 'dino-size', lower: 50, upper: 100, unit: '%' },
     { name: 'dino-shape', lower: 0.25, upper: 0.75, unit: '' },
     { name: 'cingulum-depth', lower: 0, upper: 75, unit: '%' },
@@ -97,8 +97,33 @@ const dinoConfig = [
     { name: 'b-channel-highlight', lower: 0, upper: 255, unit: '' }
 ];
 
+async function createDinophytes(dinoSpace, numDinophytes, creationDifference) {
+    const Dinophytes = [];
+    const DinophytesContainer = [];
+
+    for (let i = 0; i < numDinophytes; i++) {
+        
+        const container = document.createElement('div');
+        container.classList.add('dinophyte-container', 'pre-enter');
+        container.id = `dino-container-${i + 1}`;
+
+        dinoSpace.appendChild(container);
+
+        await new Promise(resolve => setTimeout(resolve, creationDifference));
+       
+        createDinophyte(container);
+        const dinophyte = container.lastElementChild;
+
+        
+        DinophytesContainer.push(container);
+        Dinophytes.push(dinophyte);
+    }
+
+    return { Dinophytes, DinophytesContainer };
+}
+
+
 function customizeDinophyte(options, container) {
-    // Set CSS variables on the container element of the dinophyte
     Object.entries(options).forEach(([key, value]) => {
       container.style.setProperty(`--${key}`, value);
     });
@@ -132,7 +157,7 @@ function generateDinophyteParams(vector, dinoConfig) {
 }
 
 function modifyDinophyteParams(parameter) {
-    const result = { ...parameter }; // copy the original object
+    const result = { ...parameter }; 
 
     const wingHeight = parseFloat(parameter['wing-height']);
     const wingWidth = parseFloat(parameter['wing-width']);
@@ -140,7 +165,7 @@ function modifyDinophyteParams(parameter) {
     if (wingHeight <= 0 || wingWidth <= 0) {
         result['wings-display'] = 'none';
     } else {
-        result['wings-display'] = 'block'; // or whatever you prefer
+        result['wings-display'] = 'block'; 
     }
 
     return result;
@@ -149,14 +174,12 @@ function modifyDinophyteParams(parameter) {
 function mutateVector(parentVector, mutationRate, mutationAmount) {
     return parentVector.map(value => {
         if (Math.random() < mutationRate) {
-            // Apply random mutation in range [-mutationAmount, +mutationAmount]
             let delta = (Math.random() * 2 - 1) * mutationAmount;
             let newValue = value + delta;
 
-            // Clamp the new value between 0 and 1
             return Math.min(1, Math.max(0, newValue));
         }
-        return value; // unchanged
+        return value; 
     });
 }
 
@@ -175,7 +198,7 @@ function setupDinophytes(dinoElements, dinoConfig, rawValues = null, mutationRat
         const modifiedParams = modifyDinophyteParams(params);
         customizeDinophyte(modifiedParams, dinoElement);
 
-        rawValuesArray.push(rawValuesForDino);  // store raw values for each dino
+        rawValuesArray.push(rawValuesForDino);  
     });
 
     return rawValuesArray;
@@ -186,102 +209,199 @@ function AdaptMutation(value, generation) {
 }
 
 
-// get dino containers
-const dc1 = document.getElementById('dino-container-1');
-const dc2 = document.getElementById('dino-container-2');
-const dc3 = document.getElementById('dino-container-3');
-const dc4 = document.getElementById('dino-container-4');
+function floatOutDinophytes(dinoContainers) {
+    dinoContainers.forEach(dc => {
+        dc.classList.remove('float-in');
+        dc.classList.add('float-out');
+    });
+}
 
-const generation_sign = document.getElementById('generation-sign');
+function floatToStartDinophytes(dinoContainers) {
+    dinoContainers.forEach(dc => {
+        dc.classList.remove('float-out');
+        dc.classList.remove('float-in'); 
+        dc.classList.add('pre-enter');
+    });
+}
 
-// Create the dinophytes
-createDinophyte(dc1);
-const D1 = dc1.lastElementChild;
+function floatInDinophytes(dinoContainers) {
+    requestAnimationFrame(() => {
+        dinoContainers.forEach(dc => {
+            dc.classList.remove('pre-enter');
+            dc.classList.add('float-in');
+        });
+    });
+}
 
-createDinophyte(dc2);
-const D2 = dc2.lastElementChild;
+function reset(DinophytesContainer, Dinophytes, rawValuesArrayRef) {
+    DinophytesContainer.forEach((dc) => {
+        dc.style.display = 'flex';
+    });
 
-createDinophyte(dc3);
-const D3 = dc3.lastElementChild;
+    generation = 0;
+    mutationRate = baseMutationRate;
+    mutationAmount = baseMutationAmount;
+    rawValuesArrayRef.current = setupDinophytes(Dinophytes, dinoConfig);
+    generation_sign.innerHTML = `${generation}`;
+    finalized = false;
 
-createDinophyte(dc4);
-const D4 = dc4.lastElementChild;
 
-const Dinophytes = [D1, D2, D3, D4];
-const DinophytesContainer = [dc1, dc2, dc3, dc4];
+    floatToStartDinophytes(DinophytesContainer);
+    console.log('Reset complete!');
+}
 
-// Set up the dinophytes
-let rawValuesArray = setupDinophytes(Dinophytes, dinoConfig);
+function handleDinoClick({
+    dinoContainer,
+    rawValuesIndex,
+    DinophytesContainer,
+    Dinophytes,
+    dinoConfig,
+    generation_sign,
+    maxGenerations,
+    baseMutationRate,
+    baseMutationAmount,
+    rawValuesArrayRef
+}) {
 
-const baseMutationRate = 1;
-const baseMutationAmount= 1;
-let generation = 0;
+    const updateTransitions = (durationFn) => {
+        DinophytesContainer.forEach(dc => {
+            dc.style.transition = typeof durationFn === 'function'
+                ? `${durationFn()}s linear`
+                : durationFn;
+        });
+    };
 
-let mutationRate = AdaptMutation(baseMutationRate, generation);
-let mutationAmount = AdaptMutation(baseMutationAmount, generation);
+    const runFinalization = () => {
+        DinophytesContainer.forEach(dc => {
+            if (dc !== dinoContainer) dc.style.display = 'none';
+        });
+        generation_sign.innerHTML = '';
+        console.log('Final winner selected!');
+        finalized = true;
+    };
 
-let finalized = false;
+    const runReset = () => {
+        floatOutDinophytes(DinophytesContainer);
 
-function handleDinoClick(dinoContainer, rawValuesIndex) {
+        setTimeout(() => {
+            updateTransitions('0s linear');
+            reset(
+                DinophytesContainer,
+                Dinophytes,
+                rawValuesArrayRef.current[rawValuesIndex]
+            );
+        }, 600);
+
+        setTimeout(() => {
+            dinoSpeed = Math.random() * 0.05 + 0.5;
+            updateTransitions(() => Math.random() * 0.2 + 0.4);
+        }, 1000);
+
+        setTimeout(() => floatInDinophytes(DinophytesContainer), 2000);
+    };
+
     dinoContainer.addEventListener('click', () => {
-        if (generation < 15) {
-            // Set up the dinophytes with the current parameters and mutation rates
-            rawValuesArray = setupDinophytes(Dinophytes, dinoConfig, rawValuesArray[rawValuesIndex], mutationRate, mutationAmount);
-            
-            // Increase generation count
-            generation++;
+        GenerationReport(rawValuesArrayRef.current);
 
-            // Adjust mutation rates based on the new generation
-            mutationRate = AdaptMutation(baseMutationRate, generation);
-            mutationAmount = AdaptMutation(baseMutationAmount, generation);
+        if (generation < maxGenerations) {
+            floatOutDinophytes(DinophytesContainer);
 
-            console.log('Generation:', generation);
-            console.log('Mutation Rate:', mutationRate);
-            console.log('Mutation Amount:', mutationAmount);
+            setTimeout(() => {
+                updateTransitions('0s linear');
 
-            generation_sign.innerHTML = `Generation: ${generation}`;    
-        } else if (!finalized && generation >= 10){
-            // Final generation: show only the winner
-            DinophytesContainer.forEach((dc) => {
-                if (dc !== dinoContainer) {
-                    dc.style.display = 'none';
-                } else {
-                    // Scale up the winning dinophyte
-                    dc.style.transform = 'scale(2)';
-                    dc.style.transition = 'transform 0.5s ease';
-                }
-            });
+                rawValuesArrayRef.current = setupDinophytes(
+                    Dinophytes,
+                    dinoConfig,
+                    rawValuesArrayRef.current[rawValuesIndex],
+                    mutationRate,
+                    mutationAmount
+                );
 
-            generation_sign.innerHTML = ``;
-            console.log('Final winner selected!');
+                generation++;
+                mutationRate = AdaptMutation(baseMutationRate, generation);
+                mutationAmount = AdaptMutation(baseMutationAmount, generation);
+                generation_sign.innerHTML = `${generation}`;
 
-            finalized = true;
+                floatToStartDinophytes(DinophytesContainer);
+            }, 400);
 
-        } else if (finalized) {
-            // Reset everything
-            DinophytesContainer.forEach((dc) => {
-                dc.style.display = '';
-                dc.style.transform = 'scale(1)';
-                dc.style.transition = '';
-            });
+            setTimeout(() => {
+                dinoSpeed = Math.random() * 0.05 + 0.5;
+                updateTransitions(() => Math.random() * 0.2 + 0.4);
+            }, 700);
 
-            generation = 0;
-            mutationRate = baseMutationRate;
-            mutationAmount = baseMutationAmount;
-            rawValuesArray = setupDinophytes(Dinophytes, dinoConfig);
-            generation_sign.innerHTML = `Generation: ${generation}`;
-            finalized = false;
+            setTimeout(() => floatInDinophytes(DinophytesContainer), 800);
+        }
 
-            console.log('Reset complete!');
+        else if (!finalized && generation >= maxGenerations) {
+            runFinalization();
+        }
+
+        else if (finalized) {
+            runReset();
         }
     });
 }
 
-// Handle all the dc elements (dc1, dc2, dc3, dc4) with their corresponding rawValuesArray index
-handleDinoClick(dc1, 0);
-handleDinoClick(dc2, 1);
-handleDinoClick(dc3, 2);
-handleDinoClick(dc4, 3);
+const GenerationReport = (rawValuesArrayRef) => {
+    console.log(`Generation: ${generation}`);
+    console.log(`Mutation Rate: ${mutationRate}`);
+    console.log(`Mutation Amount: ${mutationAmount}`);
+    console.log('-----------------------------------');
+    console.log('Raw Values Array:');
+    console.log(rawValuesArrayRef);
+}
+
+
+
+
+// get html elements
+const dinoSpace = document.getElementById('dino-space');
+const generation_sign = document.getElementById('generation-sign');
+
+//parameters
+const baseMutationRate = 1;
+const baseMutationAmount = 1;
+let generation = 0;
+let maxGenerations = 105;
+let mutationRate = AdaptMutation(baseMutationRate, generation);
+let mutationAmount = AdaptMutation(baseMutationAmount, generation);
+
+let dinoAmount = 3;
+let finalized = false;
+let dinoSpeed = 0.5;
+let creationDifference = 10; //ms
+
+// dynamically create dinophyte containers and dinophytes
+(async () => {
+    let { Dinophytes, DinophytesContainer } = await createDinophytes(dinoSpace, dinoAmount, creationDifference);
+
+    // Set up the dinophytes
+    let rawValuesArray = setupDinophytes(Dinophytes, dinoConfig);
+
+    let rawValuesArrayRef = { current: rawValuesArray };
+
+    // Handle all the dc elements (dc1, dc2, dc3, dc4) with their corresponding rawValuesArray index
+    
+    DinophytesContainer.forEach((dc, index) => {
+        handleDinoClick({
+            dinoContainer: dc,
+            rawValuesIndex: index,
+            DinophytesContainer,
+            Dinophytes,
+            dinoConfig,
+            generation_sign,
+            maxGenerations,
+            baseMutationRate,
+            baseMutationAmount,
+            rawValuesArrayRef
+        });
+    });
+
+    // Float in the dinophytes
+    floatInDinophytes(DinophytesContainer)
+
+})();
 
 
 
