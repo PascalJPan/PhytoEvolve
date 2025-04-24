@@ -1,4 +1,7 @@
 function createDinophyte(container) {
+  const animation_container = document.createElement('div');
+  animation_container.classList.add('animation-container');
+
   const dino = document.createElement('div');
   dino.classList.add('dinophyte-body');
 
@@ -67,35 +70,74 @@ function createDinophyte(container) {
   dino.appendChild(cilium);
   dino.appendChild(cytoplasm);
 
-  container.appendChild(dino);
+  animation_container.appendChild(dino);
+  container.appendChild(animation_container);
 }
 
 const dinoConfig = [
-    { name: 'specific-clock', lower: 0.5, upper: 1.5, unit: '' },
-    { name: 'dino-size', lower: 50, upper: 100, unit: '%' },
-    { name: 'dino-shape', lower: 0.25, upper: 0.75, unit: '' },
-    { name: 'cingulum-depth', lower: 0, upper: 75, unit: '%' },
+    { name: 'specific-clock', lower: 0.4, upper: 1, unit: '' },
+    { name: 'dino-size', lower: 40, upper: 100, unit: '%' },
+    { name: 'dino-shape', lower: 0.25, upper: 0.6, unit: '' },
+    { name: 'top-to-total-ratio', lower: 0.25, upper: 0.9, unit: '', concCenter: true, steepness: 7 },
+    { name: 'cingulum-width', lower: 0, upper: 100, unit: '%' },
+    { name: 'cingulum-length', lower: 0, upper: 100, unit: '%' },
+    { name: 'cingulum-position', lower: 0, upper: 100, unit: '%' },
+    { name: 'cingulum-depth', lower: 0, upper: 50, unit: '%' },
     { name: 'cingulum-thickness', lower: 0, upper: 100, unit: '%' },
     { name: 'roundness', lower: 60, upper: 100, unit: '%' },
     { name: 'cilium-thickness', lower: 0, upper: 0.5, unit: '', lowerThreshold: 0.1 },
     { name: 'cilium-length', lower: 0, upper: 50, unit: '%', lowerThreshold: 17 },
-    { name: 'horn-length', lower: 0, upper: 50, unit: '%' },
-    { name: 'horn-width', lower: 0, upper: 80, unit: '%' },
+    { name: 'horn-length', lower: 0, upper: 50, unit: '%', lowerThreshold: 10 },
+    { name: 'horn-width', lower: 0, upper: 80, unit: '%', lowerThreshold: 10 },
     { name: 'wing-width', lower: 0, upper: 100, unit: '%', lowerThreshold: 35 },
     { name: 'wing-height', lower: 0, upper: 100, unit: '%', lowerThreshold: 35 },
     { name: 'wing-position', lower: 0, upper: 100, unit: '%' },
     { name: 'wing-skew', lower: -25, upper: 25, unit: 'deg' },
-    { name: 'glow-size', lower: 0, upper: 30, unit: '' },
-    { name: 'glow-color-intensity', lower: 0, upper: 1, unit: '' },
+    { name: 'glow-size', lower: 0, upper: 30, unit: '', lowerThreshold: 10, concCenter: true, steepness: 7  },
     { name: 'nucleus-deformation', lower: 0, upper: 1, unit: '' },
-    { name: 'shell-opacity', lower: 0, upper: 100, unit: '%' },
-    { name: 'r-channel', lower: 0, upper: 255, unit: '' },
-    { name: 'g-channel', lower: 0, upper: 255, unit: '' },
-    { name: 'b-channel', lower: 0, upper: 255, unit: '' },
+    { name: 'shell-opacity', lower: 10, upper: 100, unit: '%', lowerThreshold: 10, upperThreshold: 90 },
+    { name: 'r-channel', lower: 30, upper: 255, unit: '' },
+    { name: 'g-channel', lower: 30, upper: 255, unit: '' },
+    { name: 'b-channel', lower: 30, upper: 255, unit: '' },
     { name: 'r-channel-highlight', lower: 0, upper: 255, unit: '' },
     { name: 'g-channel-highlight', lower: 0, upper: 255, unit: '' },
     { name: 'b-channel-highlight', lower: 0, upper: 255, unit: '' }
 ];
+
+function modifyDinophyteParams(parameter) {
+    const result = { ...parameter }; 
+
+    const wingHeight = parseFloat(parameter['wing-height']);
+    const wingWidth = parseFloat(parameter['wing-width']);
+
+    const shellOpacity = parseFloat(parameter['shell-opacity']);
+
+    const glowSize = parseFloat(parameter['glow-size']);
+
+    if (wingHeight <= 0 || wingWidth <= 0) {
+        result['wings-display'] = 'none';
+    } else {
+        result['wings-display'] = 'block'; 
+    }
+
+    if (shellOpacity <= 10) {
+        result['shell-opacity'] = '0%';
+        result['cilium-thickness'] = '0%';
+        result['cilium-length'] = '0%';
+    }   
+
+    if (glowSize <= 10) {
+        result['glow-color-intensity'] = '0.1';
+    }   else if (glowSize < 25) {
+        result['glow-color-intensity'] = '0.5';
+    } else if (glowSize < 28) {
+        result['glow-color-intensity'] = '0.75';
+    } else {
+        result['glow-color-intensity'] = '1.5';
+    }
+
+    return result;
+}
 
 async function createDinophytes(dinoSpace, numDinophytes, creationDifference) {
     const Dinophytes = [];
@@ -129,7 +171,31 @@ function customizeDinophyte(options, container) {
     });
 }
 
-const ConvertToInput = (value, lowerBound, upperBound, unit = '', lowerThreshold = null, upperThreshold = null) => {
+const sigmoid = (value, steepness) => {
+    const x0 = 0.5; 
+    return 1 / (1 + Math.exp(-steepness * (value - x0)));
+}
+
+const xxminussigmoid = (value, steepness) => {
+    const x0 = 0.5; 
+    const output = value + value - 1 / (1 + Math.exp(-steepness * (value - x0)));
+    if (output > 1) {
+        return 1;
+    } else if (output < 0) {    
+        return 0;
+    }
+    return output;
+}
+
+const ConvertToInput = (value, lowerBound, upperBound, unit = '', lowerThreshold = null, upperThreshold = null, concOutside = false, concCenter = false, steepness = 7) => {
+    
+    if (concOutside) {
+        value = sigmoid(value, steepness);
+    } else if (concCenter) {
+        value = xxminussigmoid(value, steepness);
+    }
+    
+    
     let newValue = lowerBound + (value * (upperBound - lowerBound));
     
     if (lowerThreshold !== null && newValue < lowerThreshold) {
@@ -150,26 +216,13 @@ function generateDinophyteParams(vector, dinoConfig) {
 
     const result = {};
     dinoConfig.forEach((param, i) => {
-        result[param.name] = ConvertToInput(vector[i], param.lower, param.upper, param.unit, param.lowerThreshold, param.upperThreshold);
+        result[param.name] = ConvertToInput(vector[i], param.lower, param.upper, param.unit, param.lowerThreshold, param.upperThreshold, param.concOutside, param.concCenter, param.steepness);
     });
 
     return result;
 }
 
-function modifyDinophyteParams(parameter) {
-    const result = { ...parameter }; 
 
-    const wingHeight = parseFloat(parameter['wing-height']);
-    const wingWidth = parseFloat(parameter['wing-width']);
-
-    if (wingHeight <= 0 || wingWidth <= 0) {
-        result['wings-display'] = 'none';
-    } else {
-        result['wings-display'] = 'block'; 
-    }
-
-    return result;
-}
 
 function mutateVector(parentVector, mutationRate, mutationAmount) {
     return parentVector.map(value => {
@@ -183,13 +236,16 @@ function mutateVector(parentVector, mutationRate, mutationAmount) {
     });
 }
 
-function setupDinophytes(dinoElements, dinoConfig, rawValues = null, mutationRate, mutationAmount) {
+function setupDinophytes(dinoElements, dinoConfig, Index, rawValues = null, mutationRate, mutationAmount) {
     const rawValuesArray = [];
 
-    dinoElements.forEach((dinoElement) => {
+    dinoElements.forEach((dinoElement, i) => {
         let rawValuesForDino;
+
         if (rawValues === null) {
             rawValuesForDino = Array.from({ length: dinoConfig.length }, () => Math.random());
+        } else if (Index === i) { 
+            rawValuesForDino = rawValues;
         } else {
             rawValuesForDino = mutateVector(rawValues, mutationRate, mutationAmount)
         }
@@ -204,8 +260,8 @@ function setupDinophytes(dinoElements, dinoConfig, rawValues = null, mutationRat
     return rawValuesArray;
 }
 
-function AdaptMutation(value, generation) {
-    return value * Math.pow(0.95, generation);
+function AdaptMutation(value, generation, percentRatePerGen = 0.9) {
+    return value * Math.pow(percentRatePerGen, generation);
 }
 
 
@@ -234,6 +290,7 @@ function floatInDinophytes(dinoContainers) {
 }
 
 function reset(DinophytesContainer, Dinophytes, rawValuesArrayRef) {
+
     DinophytesContainer.forEach((dc) => {
         dc.style.display = 'flex';
     });
@@ -245,16 +302,19 @@ function reset(DinophytesContainer, Dinophytes, rawValuesArrayRef) {
     generation_sign.innerHTML = `${generation}`;
     finalized = false;
 
-
     floatToStartDinophytes(DinophytesContainer);
-    console.log('Reset complete!');
+    console.log('Reset complete!'); 
+
+    return rawValuesArrayRef.current;
 }
 
 function handleDinoClick({
     dinoContainer,
     rawValuesIndex,
     DinophytesContainer,
+    DinophytesContainerFull,
     Dinophytes,
+    DinophytesFull,
     dinoConfig,
     generation_sign,
     maxGenerations,
@@ -264,7 +324,7 @@ function handleDinoClick({
 }) {
 
     const updateTransitions = (durationFn) => {
-        DinophytesContainer.forEach(dc => {
+        DinophytesContainerFull.forEach(dc => {
             dc.style.transition = typeof durationFn === 'function'
                 ? `${durationFn()}s linear`
                 : durationFn;
@@ -281,23 +341,26 @@ function handleDinoClick({
     };
 
     const runReset = () => {
-        floatOutDinophytes(DinophytesContainer);
+        floatOutDinophytes(DinophytesContainerFull);
 
         setTimeout(() => {
             updateTransitions('0s linear');
-            reset(
-                DinophytesContainer,
-                Dinophytes,
+            rawValuesArrayRef.current = reset(
+                DinophytesContainerFull,
+                DinophytesFull,
                 rawValuesArrayRef.current[rawValuesIndex]
             );
-        }, 600);
+        }, 400);
 
         setTimeout(() => {
+            
             dinoSpeed = Math.random() * 0.05 + 0.5;
             updateTransitions(() => Math.random() * 0.2 + 0.4);
-        }, 1000);
+        }, 700);
 
-        setTimeout(() => floatInDinophytes(DinophytesContainer), 2000);
+        setTimeout(() => floatInDinophytes(DinophytesContainerFull), 800)
+        
+        return rawValuesArrayRef.current;
     };
 
     dinoContainer.addEventListener('click', () => {
@@ -310,8 +373,9 @@ function handleDinoClick({
                 updateTransitions('0s linear');
 
                 rawValuesArrayRef.current = setupDinophytes(
-                    Dinophytes,
+                    DinophytesFull,
                     dinoConfig,
+                    rawValuesIndex,
                     rawValuesArrayRef.current[rawValuesIndex],
                     mutationRate,
                     mutationAmount
@@ -338,7 +402,7 @@ function handleDinoClick({
         }
 
         else if (finalized) {
-            runReset();
+            rawValuesArrayRef.current = runReset();
         }
     });
 }
@@ -352,18 +416,15 @@ const GenerationReport = (rawValuesArrayRef) => {
     console.log(rawValuesArrayRef);
 }
 
-
-
-
 // get html elements
 const dinoSpace = document.getElementById('dino-space');
 const generation_sign = document.getElementById('generation-sign');
 
 //parameters
-const baseMutationRate = 1;
-const baseMutationAmount = 1;
+const baseMutationRate = 0.9;
+const baseMutationAmount = 0.9;
 let generation = 0;
-let maxGenerations = 105;
+let maxGenerations = 10;
 let mutationRate = AdaptMutation(baseMutationRate, generation);
 let mutationAmount = AdaptMutation(baseMutationAmount, generation);
 
@@ -376,6 +437,10 @@ let creationDifference = 10; //ms
 (async () => {
     let { Dinophytes, DinophytesContainer } = await createDinophytes(dinoSpace, dinoAmount, creationDifference);
 
+    console.log('Dinophytes created:', Dinophytes);
+    console.log('Dinophytes containers created:', DinophytesContainer);
+    
+
     // Set up the dinophytes
     let rawValuesArray = setupDinophytes(Dinophytes, dinoConfig);
 
@@ -387,8 +452,10 @@ let creationDifference = 10; //ms
         handleDinoClick({
             dinoContainer: dc,
             rawValuesIndex: index,
-            DinophytesContainer,
-            Dinophytes,
+            DinophytesContainer: DinophytesContainer.filter((_, i) => i !== index),
+            Dinophytes: Dinophytes.filter((_, i) => i !== index),
+            DinophytesContainerFull: DinophytesContainer,
+            DinophytesFull: Dinophytes,
             dinoConfig,
             generation_sign,
             maxGenerations,

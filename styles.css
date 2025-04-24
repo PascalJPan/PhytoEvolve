@@ -6,13 +6,14 @@
     --wings-display: box;
 
     /* Clock */
-    --specific-clock: 1;
+    --specific-clock: 0.5;
 
     /* General shape */
     --dino-size: 100%;
     --dino-shape: 0.25; /* 0.25 - 0.75 */
+    --top-to-total-ratio: 0.6;
     
-    --cingulum-depth: 0%;
+    --cingulum-depth: 30%;
     --cingulum-thickness: 100%;
     --roundness: 60%; /* 60% - 100% */
 
@@ -28,17 +29,17 @@
     --wing-width: 50%;
     --wing-height: 100%;
     --wing-position: 100%;
-    --wing-skew: 40deg; /* -25deg - 40deg*/
+    --wing-skew: -10deg; /* -25deg - 40deg*/
 
     /* Glow */
     --glow-size: 50;
-    --glow-color-intensity: 0.5;
+    --glow-color-intensity: 2;
 
     /* Nucleus */
     --nucleus-deformation: 0;
 
     /* Colors */
-    --shell-opacity: 30%;
+    --shell-opacity: 70%;
 
     --r-channel: 30;
     --g-channel: 100;
@@ -106,6 +107,17 @@ body {
     transition: 0.5s ease-in-out;
 }
 
+.animation-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: 0.1s ease-in-out;
+}
+
 
 .dinophyte-body {
     width: calc(var(--dino-width) + 10%);
@@ -117,7 +129,8 @@ body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    background-color: black;
+    transition: filter 0.1s ease;
+    /*background-color: black;*/
     animation: shiver calc(20s * var(--specific-clock)) infinite linear;
 
     border-radius: calc(var(--roundness)*0.5) calc(var(--roundness)*0.5) calc(5% + var(--cingulum-depth)/2) calc(5% + var(--cingulum-depth)/2) / var(--roundness) var(--roundness) calc(20% + var(--cingulum-depth)/3) calc(20% + var(--cingulum-depth)/3);
@@ -125,9 +138,11 @@ body {
      /* Calculations body */
      --dino-width: calc(var(--dino-size) * (1 - var(--dino-shape)));
      --dino-height: calc(var(--dino-size) * var(--dino-shape));
- 
+     --dino-orbit-width: calc(50% - var(--dino-size) * 2 * var(--dino-shape) * (1 - var(--dino-shape)));
+     --dino-orbit-height: calc(50% - var(--dino-size) * 2 * var(--dino-shape) * (1 - var(--dino-shape)));
+
      /* Calculation color */
- 
+
      --higlight-color:rgb(var(--r-channel-highlight), var(--g-channel-highlight), var(--b-channel-highlight));
  
      --c-mid: rgb(var(--r-channel), var(--g-channel), var(--b-channel));
@@ -156,9 +171,13 @@ body {
 }
 
 .top {
-    top: 0;
-    left: 0;
+  height: calc((100% - (var(--cingulum-thickness)*0.1 + 5% )) * var(--top-to-total-ratio));
 }
+
+.bottom {
+  height: calc((100% - (var(--cingulum-thickness)*0.1 + 5% )) * (1 - var(--top-to-total-ratio)))
+}
+
 
 .plate {
     position: absolute;
@@ -204,10 +223,8 @@ body {
     z-index: -1;
 }
 
-
 .plate-8 { display: none; width: 22%; height: 17%; top: 40%; right: 12%; border-radius: 60% 40% 50% 50% / 50% 50% 50% 50%; transform: rotate(30deg) skewX(8deg); z-index: 4; background: linear-gradient(160deg, #6090a8 0%, #5a9396 60%, #4c7d7f 100%); opacity: 0.9; }
 .plate-9 { display: none; width: 15%; height: 10%; top: 32%; left: 42%; border-radius: 50%; transform: rotate(5deg); z-index: 3; background: linear-gradient(160deg, #6a9fb8 0%, #64a0a2 60%, #568b8e 100%); opacity: 0.95; }
-
 
 .cingulum-container {
     position: relative; 
@@ -289,45 +306,46 @@ body {
     box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.8),
                 inset 0 0 10px rgba(173, 216, 230, 0.2);
     z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 
 .nucleus-container {
-    width:100%;
-    height:100%;
+    width: 100%;
+    height: 100%;
+    position: relative;
     display: flex;
-    position: absolute;
     justify-content: center;
     align-items: center;
-    animation: rotateOrbitRight calc(9s * var(--specific-clock)) cubic-bezier(0.43, 0.41, 0.45, 0.4) infinite;
+    animation: nucleusOrbit calc(17s * var(--specific-clock)) cubic-bezier(0.43, 0.41, 0.45, 0.4) infinite;
 }
 
 .nucleus {
     display: flex;
     position: absolute;
-    width: 24%;
+    width: calc(var(--dino-size) * 2 * var(--dino-shape) * (1 - var(--dino-shape)));
     aspect-ratio: calc(1 + var(--nucleus-deformation));
     background: radial-gradient(ellipse at center, rgba(200, 240, 240), rgba(100, 180, 180) 70%);
     opacity: 30%;
     border-radius: 50%;
-    top: 39%;
-    left: 39%;
     box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.5),
                 0 0 5px rgba(200, 240, 240, 0.1);
     border: 1px solid rgba(224, 255, 255, 0.15);
     z-index: 1; 
-    animation: rotateOrbitLeft calc(24s * var(--specific-clock)) linear infinite;
+    animation: rotateOrbitRight calc(4s * var(--specific-clock)) linear infinite;
 }
 
 @keyframes shiver {
     0%, 100% { transform: rotate(0deg) translate(8%,-5%);}
     15% { transform: rotate(1.4deg) translate(0%,1%);}
-    25% { transform: rotate(0.9deg) translate(0%,-2%);}
+    25% { transform: rotate(0.9deg) translate(0%,-2%) scale(0.97);}
     35% { transform: rotate(-0.5deg) translate(5%,2%);}
-    50% { transform: rotate(-0.9deg); }
+    50% { transform: rotate(-0.9deg) scale(0.99); }
     60% { transform: rotate(0.6deg); }
     75% { transform: rotate(1.2deg) translate(-6%,3%);}
-    85% { transform: rotate(-0.5deg); }
+    85% { transform: rotate(-0.5deg) scale(1.01); }
 }
 
 
@@ -380,6 +398,19 @@ body {
     0%   { transform: rotate(0deg); }
     100% { transform: rotate(-360deg); }
   }
+
+@keyframes nucleusOrbit {
+    0%, 100% { transform: translate(calc(var(--dino-orbit-width) * 0.8), calc(var(--dino-orbit-height) * 0.8) ); }
+    12% { transform: translate(var(--dino-orbit-width), 0) scale(1.05); }
+    27% { transform: translate(calc(var(--dino-orbit-width) * 0.8), calc(var(--dino-orbit-height) * -0.8)); }
+    37% { transform: translate(0, calc(var(--dino-orbit-height) * -1)); }
+    48% { transform: translate(calc(var(--dino-orbit-width) * -0.8), calc(var(--dino-orbit-height) * -0.8)) scale(0.95); }
+    60% { transform: translate(calc(var(--dino-orbit-width) * -1), 0); }
+    77% { transform: translate(calc(var(--dino-orbit-width) * -0.8), calc(var(--dino-orbit-height) * 0.8) ) scale(0.9); }
+    87% { transform: translate(0, var(--dino-orbit-height)); }
+  }
+
+
 
 /* Keyframes for the trailing cilium animation */
 @keyframes wiggle {
@@ -434,3 +465,16 @@ body {
   .float-out {
     transform: translateY(-120vh); 
   }
+
+  .animation-container:hover {
+    transform: scale(1.05);
+  }
+
+  .animation-container:active {
+    transform: scale(0.95);
+  }
+
+  
+ 
+
+ 

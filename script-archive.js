@@ -23,3 +23,27 @@ customizeDinophyte({
     'g-channel-highlight': '100', //0 - 255
     'b-channel-highlight': '150' //0 - 255
 }, firstDino);
+
+
+createDinophytes(dinoSpace, 4);
+
+const dc1 = document.getElementById('dino-container-1');
+const dc2 = document.getElementById('dino-container-2');
+const dc3 = document.getElementById('dino-container-3');
+const dc4 = document.getElementById('dino-container-4');
+
+const D1 = dc1.lastElementChild;
+const D2 = dc2.lastElementChild;
+const D3 = dc3.lastElementChild;
+const D4 = dc4.lastElementChild;
+
+const values = [0.01, 0.05, 0.1, 0.3, 0.5, 0.7, 0.9, 0.95, 0.99];
+const transformedOutside = values.map(v => concOutside(v,7));
+console.log(transformedOutside);
+
+const transformedCenter = values.map(v => concCenter(v,7));
+console.log(transformedCenter);
+
+
+// sigmoid with steepness 7 leads to concentration outside
+// concCenter() with 7 leads to concentration inside
