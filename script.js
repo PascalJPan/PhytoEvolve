@@ -76,8 +76,8 @@ function createDinophyte(container) {
 
 const dinoConfig = [
     { name: 'specific-clock', lower: 0.4, upper: 1, unit: '' },
-    { name: 'dino-size', lower: 40, upper: 100, unit: '%' },
-    { name: 'dino-shape', lower: 0.25, upper: 0.6, unit: '' },
+    { name: 'dino-size', lower: 45, upper: 110, unit: '%', concCenter: true, steepness: 6 },
+    { name: 'dino-shape', lower: 0.25, upper: 0.75, unit: '' },
     { name: 'top-to-total-ratio', lower: 0.25, upper: 0.9, unit: '', concCenter: true, steepness: 7 },
     { name: 'cingulum-width', lower: 0, upper: 100, unit: '%' },
     { name: 'cingulum-length', lower: 0, upper: 100, unit: '%' },
@@ -260,10 +260,24 @@ function setupDinophytes(dinoElements, dinoConfig, Index, rawValues = null, muta
     return rawValuesArray;
 }
 
-function AdaptMutation(value, generation, percentRatePerGen = 0.9) {
-    return value * Math.pow(percentRatePerGen, generation);
+function setupDecoration(DecorationElement, dinoConfig, rawValues) {
+    const params = generateDinophyteParams(rawValues, dinoConfig);
+    const modifiedParams = modifyDinophyteParams(params);
+    customizeDinophyte(modifiedParams, DecorationElement)
 }
 
+function AdaptMutation(value, generation, percentRatePerGen = 0.9) {
+    return value * Math.pow(percentRatePerGen, generation - 1);
+}
+
+function updateGenerationSign(new_generation) {
+    if (typeof new_generation === 'number' && !isNaN(new_generation)) {
+        generation_sign.innerHTML = `Gen ${new_generation}/${maxGenerations}`;
+    } else if (typeof new_generation === 'string') {
+        generation_sign.innerHTML = new_generation;
+    }
+    
+}
 
 function floatOutDinophytes(dinoContainers) {
     dinoContainers.forEach(dc => {
@@ -289,17 +303,41 @@ function floatInDinophytes(dinoContainers) {
     });
 }
 
-function reset(DinophytesContainer, Dinophytes, rawValuesArrayRef) {
+async function finalEvolution(dc, winner) {
+    if (winner == true) {
+        if (!dc.classList.contains('final-evolution')) {
+            console.log(`${dc.id} final evoltion`);
+            
+            dc.classList.add('final-evolution');
+            setTimeout(() => {
+                dc.classList.remove('final-evolution');
+                dc.classList.remove('float-in');
+                }, 2500);
+                
+        }
+        
+    } else {
+        dc.classList.add('final-evolution-loser');
+
+        setTimeout(() => {
+            dc.style.display = 'none'
+            dc.classList.remove('final-evolution-loser');
+        }, 1000);
+    }
+    
+    console.log("Final Evolution Animation")
+}
+
+function reset(DinophytesContainer, Dinophytes, rawValuesArrayRef, generation_sign) {
 
     DinophytesContainer.forEach((dc) => {
         dc.style.display = 'flex';
     });
 
-    generation = 0;
+    generation = 1;
     mutationRate = baseMutationRate;
     mutationAmount = baseMutationAmount;
     rawValuesArrayRef.current = setupDinophytes(Dinophytes, dinoConfig);
-    generation_sign.innerHTML = `${generation}`;
     finalized = false;
 
     floatToStartDinophytes(DinophytesContainer);
@@ -313,10 +351,8 @@ function handleDinoClick({
     rawValuesIndex,
     DinophytesContainer,
     DinophytesContainerFull,
-    Dinophytes,
     DinophytesFull,
     dinoConfig,
-    generation_sign,
     maxGenerations,
     baseMutationRate,
     baseMutationAmount,
@@ -332,10 +368,14 @@ function handleDinoClick({
     };
 
     const runFinalization = () => {
-        DinophytesContainer.forEach(dc => {
-            if (dc !== dinoContainer) dc.style.display = 'none';
+        DinophytesContainerFull.forEach(dc => {
+            if (dc !== dinoContainer) {
+                finalEvolution(dc, winner = false)
+            } else {
+                finalEvolution(dc, winner = true)
+            }
         });
-        generation_sign.innerHTML = '';
+        
         console.log('Final winner selected!');
         finalized = true;
     };
@@ -350,6 +390,7 @@ function handleDinoClick({
                 DinophytesFull,
                 rawValuesArrayRef.current[rawValuesIndex]
             );
+            updateGenerationSign(generation);
         }, 400);
 
         setTimeout(() => {
@@ -367,8 +408,8 @@ function handleDinoClick({
         GenerationReport(rawValuesArrayRef.current);
 
         if (generation < maxGenerations) {
+            playSound("click", 0.01);
             floatOutDinophytes(DinophytesContainer);
-
             setTimeout(() => {
                 updateTransitions('0s linear');
 
@@ -382,9 +423,9 @@ function handleDinoClick({
                 );
 
                 generation++;
+                updateGenerationSign(generation);
                 mutationRate = AdaptMutation(baseMutationRate, generation);
                 mutationAmount = AdaptMutation(baseMutationAmount, generation);
-                generation_sign.innerHTML = `${generation}`;
 
                 floatToStartDinophytes(DinophytesContainer);
             }, 400);
@@ -398,10 +439,16 @@ function handleDinoClick({
         }
 
         else if (!finalized && generation >= maxGenerations) {
+            playSound("evolution", 0.3);
+            setupDecoration(finalDecoration, dinoConfig, rawValuesArrayRef.current[rawValuesIndex])
+            finalDecoration.style.transform = 'scale(2)';
             runFinalization();
+            updateGenerationSign(`Evolved`);
         }
 
         else if (finalized) {
+            playSound("reset", 0.03);
+            finalDecoration.style.transform = 'scale(5)';
             rawValuesArrayRef.current = runReset();
         }
     });
@@ -416,6 +463,37 @@ const GenerationReport = (rawValuesArrayRef) => {
     console.log(rawValuesArrayRef);
 }
 
+const soundLibrary = {
+  evolution: { path: 'sounds/evolution.mp3', volume: 0.3 },
+  click: { path: 'sounds/click.mp3', volume: 0.3 },
+  reset: { path: 'sounds/reset.mp3', volume: 0.3 },
+};
+
+const loadedSounds = {};
+
+// Preload all sounds
+for (const [name, config] of Object.entries(soundLibrary)) {
+  const audio = new Audio(config.path);
+  audio.preload = 'auto';
+  audio.volume = config.volume ?? 1.0;
+  loadedSounds[name] = audio;
+}
+
+function playSound(name, overrideVolume = null) {
+  const baseAudio = loadedSounds[name];
+  if (!baseAudio) {
+    console.warn(`Sound "${name}" not found.`);
+    return;
+  }
+
+  const volume = overrideVolume !== null ? overrideVolume : baseAudio.volume;
+
+    const clone = baseAudio.cloneNode();
+    clone.volume = volume;
+    clone.play().catch(e => console.warn(`Failed to play sound "${name}":`, e));
+
+}
+
 // get html elements
 const dinoSpace = document.getElementById('dino-space');
 const generation_sign = document.getElementById('generation-sign');
@@ -423,15 +501,22 @@ const generation_sign = document.getElementById('generation-sign');
 //parameters
 const baseMutationRate = 0.9;
 const baseMutationAmount = 0.9;
-let generation = 0;
+let generation = 1;
 let maxGenerations = 10;
+updateGenerationSign(generation);
 let mutationRate = AdaptMutation(baseMutationRate, generation);
 let mutationAmount = AdaptMutation(baseMutationAmount, generation);
 
 let dinoAmount = 3;
+dinoSpace.style.setProperty('--dino-amount', dinoAmount);
 let finalized = false;
 let dinoSpeed = 0.5;
 let creationDifference = 10; //ms
+
+const finalDecoration = document.getElementById('final-decoration');
+finalDecoration.style.transition = '2s linear';
+
+
 
 // dynamically create dinophyte containers and dinophytes
 (async () => {
@@ -457,7 +542,6 @@ let creationDifference = 10; //ms
             DinophytesContainerFull: DinophytesContainer,
             DinophytesFull: Dinophytes,
             dinoConfig,
-            generation_sign,
             maxGenerations,
             baseMutationRate,
             baseMutationAmount,

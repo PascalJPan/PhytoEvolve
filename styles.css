@@ -1,8 +1,12 @@
 
 :root {
+    --height-unit: 1vh;
+    --width-unit: 1vw;
+
     /* Dinophyte container */
+    --dino-amount: 4;
     --dino-container-width: 25vw;
-    --dino-container-height: 100vh;
+    --dino-container-height: 25vw;
     --wings-display: box;
 
     /* Clock */
@@ -50,6 +54,14 @@
     --b-channel-highlight: 150;
 }
 
+@media (max-aspect-ratio: 1/1) {
+  :root {
+    --height-unit: 1vw;
+    --width-unit: 1vh;
+  }
+}
+
+
 body {
     background-color: black;
     margin: 0;
@@ -64,9 +76,10 @@ body {
 
 #header-space {
   position: absolute;
-  width: 20vw;
-  height: 10vh;
-  top: 5vh;
+  width: calc(25 * var(--width-unit));
+  height: calc(10 * var(--height-unit));
+  bottom: 0;
+  left: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -82,24 +95,24 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: calc(3rem);
+  font-size: calc(2rem);
   color: white;
+  background-color: transparent;
 }
 
 #dino-space {
     position: relative;
-    width: 100vw;
-    height: 100vh;
+    width: calc(100 * var(--width-unit));
+    height: calc(100 * var(--height-unit) / var(--dino-amount));
     display: flex;
     justify-content: center;
     align-items: center;
-    overflow: hidden;
 }
 
 .dinophyte-container {
     position: relative;
-    width: var(--dino-container-width);
-    height: var(--dino-container-height);
+    width: calc(100 * var(--width-unit) / var(--dino-amount));
+    height: calc(100 * var(--width-unit) / var(--dino-amount));
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -120,7 +133,7 @@ body {
 
 
 .dinophyte-body {
-    width: calc(var(--dino-width) + 10%);
+    width: calc(var(--dino-width));
     height: var(--dino-height);
     position: relative;
     top: 0;
@@ -136,8 +149,8 @@ body {
     border-radius: calc(var(--roundness)*0.5) calc(var(--roundness)*0.5) calc(5% + var(--cingulum-depth)/2) calc(5% + var(--cingulum-depth)/2) / var(--roundness) var(--roundness) calc(20% + var(--cingulum-depth)/3) calc(20% + var(--cingulum-depth)/3);
 
      /* Calculations body */
-     --dino-width: calc(var(--dino-size) * (1 - var(--dino-shape)));
-     --dino-height: calc(var(--dino-size) * var(--dino-shape));
+     --dino-width: calc(var(--dino-size) * (1 - var(--dino-shape)) + 10%);
+     --dino-height: calc(var(--dino-size) * var(--dino-shape)  + 10%);
      --dino-orbit-width: calc(50% - var(--dino-size) * 2 * var(--dino-shape) * (1 - var(--dino-shape)));
      --dino-orbit-height: calc(50% - var(--dino-size) * 2 * var(--dino-shape) * (1 - var(--dino-shape)));
 
@@ -445,14 +458,23 @@ body {
     50% { filter: drop-shadow(0 0 calc(var(--glow-size)*1.2px) var(--c-very-light)); }
   }
 
+  @keyframes final-evolution-animation {
+    0% { transform: scale(1) rotate(0); }
+    42% { transform: scale(0) rotate(-540deg); }
+    58% { transform: scale(0) rotate(540deg); }
+    100% { transform: scale(1) rotate(0deg); }
+  }
 
+  @keyframes final-evolution-loser-animation {
+    0% { transform: scale(1) rotate(0); }
+    50%,100% { transform: scale(1) rotate(0deg); filter: opacity(0) }
+  }
 
 /* Interactive elements */
-.plate:hover {
+  .plate:hover {
     filter: brightness(1.3) drop-shadow(0 0 5px var(--glow-color));
     transition: filter 0.3s ease;
   }
-
 
   .pre-enter {
     transform: translateY(120vh); /* Start below the screen */
@@ -466,6 +488,14 @@ body {
     transform: translateY(-120vh); 
   }
 
+  .final-evolution {
+    animation: final-evolution-animation 2s forwards;
+  }
+
+  .final-evolution-loser {
+    animation: final-evolution-loser-animation 2s ease-in;
+  }
+
   .animation-container:hover {
     transform: scale(1.05);
   }
@@ -474,7 +504,177 @@ body {
     transform: scale(0.95);
   }
 
-  
- 
+  #final-decoration {
+    display: flex;
+    position: fixed;
+    top: 0%;
+    left: 0%;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 9999;
+    box-sizing: border-box;
+    transform: scale(5);
+    --r-channel-highlight: 255;
+    --g-channel-highlight: 255;
+    --b-channel-highlight: 255;
+    --higlight-color:rgb(var(--r-channel-highlight), var(--g-channel-highlight), var(--b-channel-highlight));
+  }
 
+  .final-decoration-frame {
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .final-decoration-item {
+    background-color: var(--higlight-color);
+  }
+
+  .fd1 {
+    position: absolute;
+    width: 100%;
+    height: 7%;
+    top: 0%;
+    left: 0%;
+    transform: rotate(0deg);
+  }
+
+  .fd2 {
+    position: absolute;
+    width: 7%;
+    height: 100%;
+    top: 0%;
+    right: 0%;
+    transform: rotate(0deg);
+  }
+
+  .fd3 {
+    position: absolute;
+    width: 100%;
+    height: 7%;
+    bottom: 0%;
+    left: 0%;
+    transform: rotate(0deg);
+  }
+
+  .fd4 {
+    position: absolute;
+    width: 7%;
+    height: 100%;
+    top: 0%;
+    left: 0%;
+    transform: rotate(0deg);
+  }
+
+.fd5 {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-left: 10vw solid transparent;
+  border-right: 12vw solid transparent;
+  border-bottom: 24vh solid var(--higlight-color);
+  background-color: transparent;
+  top: 0%;
+  left: 0%;
+  transform: rotate(12deg);
+}
+
+.fd6 {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-left: 10vw solid transparent;
+  border-right: 10vw solid transparent;
+  border-bottom: 20vh solid var(--higlight-color);
+  background-color: transparent;
+  top: 0%;
+  right: 0%;
+  transform: rotate(-12deg);
+}
+
+.fd7 {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-left: 9.5vw solid transparent;
+  border-right: 12vw solid transparent;
+  border-top: 24vh solid var(--higlight-color);
+  background-color: transparent;
+  bottom: 0%;
+  left: 0%;
+  transform: rotate(6deg);
+}
+
+.fd8 {
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-left: 12vw solid transparent;
+  border-right: 10vw solid transparent;
+  border-top: 24vh solid var(--higlight-color);
+  background-color: transparent;
+  bottom: 0%;
+  right: 0%;
+  transform: rotate(5deg);
+}
+
+.final-decoration-active {
+ animation: final-decoration-active 2s infinite;
+}
+
+@keyframes final-decoration-active {
+  0% {
+    transform: scale(0.5);
+  }
+  25% {
+    transform: scale(0.51);
+  }
+  50% {
+    transform: scale(0.5);
+  }
+  75% {
+    transform: scale(0.515);
+  }
+  100% {
+    transform: scale(0.5);
+  }
+}
+
+  
+
+  
+
+  
+  @keyframes pulseGlow {
+    0% {
+      box-shadow:
+        0 0 8px white,
+        0 0 16px white,
+        inset 0 0 8px white;
+    }
+    100% {
+      box-shadow:
+        0 0 20px white,
+        0 0 30px white,
+        inset 0 0 12px white;
+    }
+  }
+  
+
+  
+ /* Phone styles */
+  @media (max-aspect-ratio: 1/1) {
+    #header-space {
+      top: 0;
+      left: 0;
+      transform-origin: top left;
+      transform: rotate(90deg) translate(0, -100%);
+    }
+
+    #dino-space {  
+      height: 100dvw;
+      width: 100dvh;
+      transform: rotate(90deg);
+    }
+  }
  
