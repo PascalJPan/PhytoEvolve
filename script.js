@@ -408,7 +408,7 @@ function handleDinoClick({
         GenerationReport(rawValuesArrayRef.current);
 
         if (generation < maxGenerations) {
-            playSound("click", 0.01);
+            playSound("click", 0.03);
             floatOutDinophytes(DinophytesContainer);
             setTimeout(() => {
                 updateTransitions('0s linear');
@@ -439,15 +439,16 @@ function handleDinoClick({
         }
 
         else if (!finalized && generation >= maxGenerations) {
-            playSound("evolution", 0.3);
+            playSound("evolution", 0.5);
             setupDecoration(finalDecoration, dinoConfig, rawValuesArrayRef.current[rawValuesIndex])
+            finalDecoration.style.opacity = `1`;
             finalDecoration.style.transform = 'scale(2)';
             runFinalization();
             updateGenerationSign(`Evolved`);
         }
 
         else if (finalized) {
-            playSound("reset", 0.03);
+            playSound("reset", 0.05);
             finalDecoration.style.transform = 'scale(5)';
             rawValuesArrayRef.current = runReset();
         }
@@ -464,9 +465,9 @@ const GenerationReport = (rawValuesArrayRef) => {
 }
 
 const soundLibrary = {
-  evolution: { path: 'sounds/evolution.mp3', volume: 0.3 },
-  click: { path: 'sounds/click.mp3', volume: 0.3 },
-  reset: { path: 'sounds/reset.mp3', volume: 0.3 },
+  evolution: { path: 'sounds/evolution.mp3', volume: 0.6 },
+  click: { path: 'sounds/click.mp3', volume: 0.6 },
+  reset: { path: 'sounds/reset.mp3', volume: 0.6 },
 };
 
 const loadedSounds = {};
@@ -487,11 +488,9 @@ function playSound(name, overrideVolume = null) {
   }
 
   const volume = overrideVolume !== null ? overrideVolume : baseAudio.volume;
-
     const clone = baseAudio.cloneNode();
     clone.volume = volume;
     clone.play().catch(e => console.warn(`Failed to play sound "${name}":`, e));
-
 }
 
 // get html elements
@@ -528,11 +527,9 @@ finalDecoration.style.transition = '2s linear';
 
     // Set up the dinophytes
     let rawValuesArray = setupDinophytes(Dinophytes, dinoConfig);
-
     let rawValuesArrayRef = { current: rawValuesArray };
 
     // Handle all the dc elements (dc1, dc2, dc3, dc4) with their corresponding rawValuesArray index
-    
     DinophytesContainer.forEach((dc, index) => {
         handleDinoClick({
             dinoContainer: dc,
@@ -553,7 +550,4 @@ finalDecoration.style.transition = '2s linear';
     floatInDinophytes(DinophytesContainer)
 
 })();
-
-
-
 

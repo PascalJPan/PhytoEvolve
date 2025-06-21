@@ -1,12 +1,13 @@
 
 :root {
-    --height-unit: 1vh;
-    --width-unit: 1vw;
+    --height-unit: 1dvh;
+    --width-unit: 1dvw;
+    --gen-sign-font: 2rem;
 
     /* Dinophyte container */
     --dino-amount: 4;
-    --dino-container-width: 25vw;
-    --dino-container-height: 25vw;
+    --dino-container-width: 25dvw;
+    --dino-container-height: 25dvw;
     --wings-display: box;
 
     /* Clock */
@@ -56,8 +57,9 @@
 
 @media (max-aspect-ratio: 1/1) {
   :root {
-    --height-unit: 1vw;
-    --width-unit: 1vh;
+    --height-unit: 1dvw;
+    --width-unit: 1dvh;
+    --gen-sign-font: 1.5rem;
   }
 }
 
@@ -70,7 +72,7 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
+    min-height: 100dvh;
     overflow: hidden;
 }
 
@@ -95,7 +97,7 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: calc(2rem);
+  font-size: var(--gen-sign-font);
   color: white;
   background-color: transparent;
 }
@@ -131,7 +133,6 @@ body {
   transition: 0.1s ease-in-out;
 }
 
-
 .dinophyte-body {
     width: calc(var(--dino-width));
     height: var(--dino-height);
@@ -156,20 +157,18 @@ body {
 
      /* Calculation color */
 
-     --higlight-color:rgb(var(--r-channel-highlight), var(--g-channel-highlight), var(--b-channel-highlight));
+     --highlight-color:rgb(var(--r-channel-highlight), var(--g-channel-highlight), var(--b-channel-highlight));
  
      --c-mid: rgb(var(--r-channel), var(--g-channel), var(--b-channel));
      --c-light: color-mix(in srgb, var(--c-mid) 80%, white);
      --c-dark: color-mix(in srgb, var(--c-mid) 80%, black);
      
      --c-shell1: color-mix(in srgb, var(--c-mid) 50%, white);
-     --c-shell2: color-mix(in srgb, var(--c-light) 80%, var(--higlight-color));
+     --c-shell2: color-mix(in srgb, var(--c-light) 80%, var(--highlight-color));
      
      --glow-color-raw: rgb(var(--r-channel-highlight), var(--g-channel-highlight), var(--b-channel-highlight));
-     
      --glow-color: color-mix(in srgb, var(--c-mid) 50%, rgba(255,255,255, var(--glow-color-intensity)));
      --c-very-light: color-mix(in srgb, var(--c-mid) 20%, rgba(255,255,255, var(--glow-color-intensity)));
- 
      --plate-border-color: color-mix(in srgb, var(--c-mid) 10%, black);
 }
 
@@ -274,7 +273,7 @@ body {
     left: calc(var(--cingulum-depth) * 0.5 - 10%);
     width: calc(100% - var(--cingulum-depth) + 20%);
     height: calc(var(--cilium-thickness)*0.7*var(--dino-container-width)); 
-    background: var(--higlight-color);
+    background: var(--highlight-color);
     opacity: 100%; 
     border-radius: 2px;
     z-index: 6; 
@@ -287,7 +286,7 @@ body {
     left: 50%;
     width: calc(var(--cilium-thickness)*0.05*var(--dino-container-width));
     height: var(--cilium-length);
-    background: var(--higlight-color);
+    background: var(--highlight-color);
     transform-origin: top center;
     z-index: 0; 
     animation: wiggle calc(2s * var(--specific-clock)) cubic-bezier(0.65, 0.05, 0.36, 0.95) infinite;
@@ -477,7 +476,7 @@ body {
   }
 
   .pre-enter {
-    transform: translateY(120vh); /* Start below the screen */
+    transform: translateY(120dvh); /* Start below the screen */
   }
   
   .float-in {
@@ -485,7 +484,7 @@ body {
   }
 
   .float-out {
-    transform: translateY(-120vh); 
+    transform: translateY(-120dvh); 
   }
 
   .final-evolution {
@@ -505,29 +504,29 @@ body {
   }
 
   #final-decoration {
-    display: flex;
     position: fixed;
+    opacity: 0;
     top: 0%;
     left: 0%;
-    width: 100vw;
-    height: 100vh;
+    width: 100dvw;
+    height: 100dvh;
     pointer-events: none;
     z-index: 9999;
     box-sizing: border-box;
     transform: scale(5);
-    --r-channel-highlight: 255;
-    --g-channel-highlight: 255;
-    --b-channel-highlight: 255;
-    --higlight-color:rgb(var(--r-channel-highlight), var(--g-channel-highlight), var(--b-channel-highlight));
+    --r-channel-highlight: 0;
+    --g-channel-highlight: 0;
+    --b-channel-highlight: 0;
+    --highlight-color:rgb(var(--r-channel-highlight), var(--g-channel-highlight), var(--b-channel-highlight));
   }
 
   .final-decoration-frame {
-    width: 100vw;
-    height: 100vh;
+    width: 100dvw;
+    height: 100dvh;
   }
 
   .final-decoration-item {
-    background-color: var(--higlight-color);
+    background-color: var(--highlight-color);
   }
 
   .fd1 {
@@ -568,54 +567,46 @@ body {
 
 .fd5 {
   position: absolute;
-  width: 0;
-  height: 0;
-  border-left: 10vw solid transparent;
-  border-right: 12vw solid transparent;
-  border-bottom: 24vh solid var(--higlight-color);
+  border-left: 18dvw solid transparent;
+  border-right: 20dvw solid transparent;
+  border-bottom: 31dvh solid var(--highlight-color);
   background-color: transparent;
-  top: 0%;
-  left: 0%;
-  transform: rotate(12deg);
+  top: -10%;
+  left: -10%;
+  transform: rotate(9deg);
 }
 
 .fd6 {
   position: absolute;
-  width: 0;
-  height: 0;
-  border-left: 10vw solid transparent;
-  border-right: 10vw solid transparent;
-  border-bottom: 20vh solid var(--higlight-color);
+  border-left: 20dvw solid transparent;
+  border-right: 17dvw solid transparent;
+  border-bottom: 32dvh solid var(--highlight-color);
   background-color: transparent;
-  top: 0%;
-  right: 0%;
+  top: -12%;
+  right: -10%;
   transform: rotate(-12deg);
 }
 
 .fd7 {
   position: absolute;
-  width: 0;
-  height: 0;
-  border-left: 9.5vw solid transparent;
-  border-right: 12vw solid transparent;
-  border-top: 24vh solid var(--higlight-color);
+  border-left: 15dvw solid transparent;
+  border-right: 27dvw solid transparent;
+  border-top: 28dvh solid var(--highlight-color);
   background-color: transparent;
-  bottom: 0%;
-  left: 0%;
-  transform: rotate(6deg);
+  bottom: -13%;
+  left: -13%;
+  transform: rotate(-15deg);
 }
 
 .fd8 {
   position: absolute;
-  width: 0;
-  height: 0;
-  border-left: 12vw solid transparent;
-  border-right: 10vw solid transparent;
-  border-top: 24vh solid var(--higlight-color);
+  border-left: 15dvw solid transparent;
+  border-right: 23dvw solid transparent;
+  border-top: 28dvh solid var(--highlight-color);
   background-color: transparent;
-  bottom: 0%;
-  right: 0%;
-  transform: rotate(5deg);
+  bottom: -12%;
+  right: -11%;
+  transform: rotate(15deg);
 }
 
 .final-decoration-active {
@@ -640,11 +631,6 @@ body {
   }
 }
 
-  
-
-  
-
-  
   @keyframes pulseGlow {
     0% {
       box-shadow:
@@ -659,8 +645,6 @@ body {
         inset 0 0 12px white;
     }
   }
-  
-
   
  /* Phone styles */
   @media (max-aspect-ratio: 1/1) {
