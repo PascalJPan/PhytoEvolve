@@ -24,5 +24,4 @@ Check it out on this [Website](https://pascalpan.com/creations/PhytoEvolve/)!
 
 ---
 
-Feel free to reach out!
-[Pascal Pan](https://www.linkedin.com/in/pascal-stümpfl-a79b21299)  
+Feel free to reach out on [LinkedIn](https://www.linkedin.com/in/pascal-stümpfl-a79b21299). 
