@@ -1,6 +1,8 @@
-**PhytoMorph** is an interactive web-based evolution simulator inspired by Dinophytes — a group of unique, single-celled organisms. It’s a fusion of **biology, digital art, and artificial intelligence**.
+**PhytoEvolve** is an interactive web-based evolution simulator inspired by Dinophytes — a group of unique, single-celled organisms. It’s a fusion of **biology, digital art, and artificial intelligence**.
 
 The simulation lets users interact with visual traits, triggering a generational evolution process guided by AI-driven selection.
+
+Check it out on this [Website](https://pascalpan.com/creations/PhytoEvolve/)!
 
 ---
 
